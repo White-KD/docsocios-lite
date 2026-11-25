@@ -1,0 +1,67 @@
+name: CI/CD - DocSocios Lite
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  testes:
+    name: Integração (verificação + testes)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Verificar sintaxe (compilação)
+        run: python -m compileall -q app tests run.py
+
+      - name: Executar testes automatizados
+        run: |
+          mkdir -p reports
+          python -m pytest -v --junitxml=reports/junit.xml
+
+      - name: Publicar relatório dos testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-testes
+          path: reports/junit.xml
+
+  entrega:
+    name: Entrega (empacotar e publicar)
+    needs: testes            # só roda se TODOS os testes passarem
+    runs-on: ubuntu-latest
+    env:
+      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Gerar pacote de release
+        run: |
+          mkdir -p dist
+          VERSAO="$(date +%Y.%m.%d)-${GITHUB_SHA::7}"
+          echo "$VERSAO" > VERSION
+          zip -r "dist/docsocios-lite-$VERSAO.zip" app run.py requirements.txt README.md VERSION
+          ls -l dist
+
+      - name: Publicar pacote como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: docsocios-lite-release
+          path: dist/*.zip
+
+      - name: Deploy no Render (opcional, apenas na main)
+        if: github.ref == 'refs/heads/main' && env.RENDER_DEPLOY_HOOK != ''
+        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
