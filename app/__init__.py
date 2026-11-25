@@ -43,4 +43,11 @@ def create_app(db_path="docsocios.db"):
             db(), d.get("medico_id"), d.get("data"), d.get("turno"), d.get("valor"))
         return jsonify(plantao), 201
 
+    # ---------------------------------------------------------- Repasse
+    @app.get("/api/repasse")
+    def repasse():
+        mes = request.args.get("mes")
+        taxa = request.args.get("taxa", services.TAXA_ADMIN_PADRAO)
+        return jsonify(services.calcular_repasse(db(), mes, taxa))
+
     return app
