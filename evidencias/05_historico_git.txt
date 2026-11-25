@@ -1,0 +1,27 @@
+*   5b4fdef Merge branch 'feature/interface-web' (PR #4)
+|\  
+| * d0ea6cc feat(ui): interface web com cadastro, escala e repasse
+|/  
+*   5e1e27e Merge branch 'feature/repasse-medicos' (PR #3)
+|\  
+| * 00cd4b2 fix(repasse): converter taxa percentual (10%) para fração antes de descontar
+| * 39976c8 test(repasse): soma por mês, taxa de 10%, taxa zero e mês inválido
+| * bd6a8e2 feat(repasse): cálculo do repasse mensal por médico com taxa administrativa
+|/  
+*   c834007 Merge branch 'feature/escala-plantoes' (PR #2)
+|\  
+| * 5bdaa58 test(plantoes): escala por mês, conflito de turno e validações
+| * d6d065e feat(plantoes): registro de plantões com bloqueio de conflito de escala
+|/  
+*   e6c7b88 Merge branch 'feature/cadastro-medicos' (PR #1)
+|\  
+| * 75c3655 test(medicos): testes de cadastro, CRM inválido e CRM duplicado
+| * e7d8bf1 feat(medicos): regra de cadastro com validação e normalização de CRM
+|/  
+* 0c8d6e9 chore: estrutura inicial do projeto, endpoint de saúde e pipeline CI/CD
+* docs/readme-evidencias
+  feature/cadastro-medicos
+  feature/escala-plantoes
+  feature/interface-web
+  feature/repasse-medicos
+  main
