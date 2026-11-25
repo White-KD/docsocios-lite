@@ -86,3 +86,30 @@ def listar_escala(conn, mes=None):
         params = (mes,)
     sql += " ORDER BY p.data, p.turno"
     return [dict(r) for r in conn.execute(sql, params).fetchall()]
+
+
+# ---------------------------------------------------------------- Repasse
+TAXA_ADMIN_PADRAO = 10.0  # % retido pela administração da escala
+
+
+def calcular_repasse(conn, mes, taxa_percentual=TAXA_ADMIN_PADRAO):
+    """Soma os plantões do mês por médico e aplica a taxa administrativa."""
+    if not re.match(r"^\d{4}-\d{2}$", mes or ""):
+        raise ErroValidacao("Mês inválido. Use AAAA-MM.")
+    taxa = float(taxa_percentual)
+    if not 0 <= taxa <= 100:
+        raise ErroValidacao("A taxa deve estar entre 0 e 100%.")
+    rows = conn.execute(
+        "SELECT m.nome, m.crm, COUNT(*) AS plantoes, SUM(p.valor) AS bruto "
+        "FROM plantoes p JOIN medicos m ON m.id = p.medico_id "
+        "WHERE substr(p.data, 1, 7) = ? GROUP BY m.id ORDER BY m.nome",
+        (mes,),
+    ).fetchall()
+    resultado = []
+    for r in rows:
+        bruto = float(r["bruto"])
+        liquido = round(bruto * (1 - taxa / 100), 2)  # taxa vem em %, ex.: 10 -> 0,10
+        resultado.append({"medico": r["nome"], "crm": r["crm"], "plantoes": r["plantoes"],
+                          "bruto": round(bruto, 2), "taxa": round(bruto - liquido, 2),
+                          "liquido": liquido})
+    return resultado
