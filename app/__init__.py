@@ -31,4 +31,16 @@ def create_app(db_path="docsocios.db"):
         medico = services.cadastrar_medico(db(), dados.get("nome"), dados.get("crm"))
         return jsonify(medico), 201
 
+    # ---------------------------------------------------------- Plantões
+    @app.get("/api/plantoes")
+    def listar_plantoes():
+        return jsonify(services.listar_escala(db(), request.args.get("mes")))
+
+    @app.post("/api/plantoes")
+    def registrar_plantao():
+        d = request.get_json(silent=True) or {}
+        plantao = services.registrar_plantao(
+            db(), d.get("medico_id"), d.get("data"), d.get("turno"), d.get("valor"))
+        return jsonify(plantao), 201
+
     return app
