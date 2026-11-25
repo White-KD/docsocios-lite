@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocSócios Lite — Escalas e Repasses</title>
+<style>
+  :root { --azul:#0f3d5e; --verde:#1f8a70; --fundo:#f4f6f8; --borda:#d9dee3; --erro:#b42318; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--fundo); color:#1d2731; }
+  header { background:var(--azul); color:#fff; padding:18px 28px; display:flex; align-items:baseline; gap:12px; }
+  header h1 { margin:0; font-size:22px; } header span { opacity:.75; font-size:14px; }
+  main { max-width:1100px; margin:24px auto; padding:0 16px; display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+  section { background:#fff; border:1px solid var(--borda); border-radius:10px; padding:18px; }
+  section.full { grid-column: 1 / -1; }
+  h2 { margin:0 0 12px; font-size:16px; color:var(--azul); }
+  form { display:flex; flex-wrap:wrap; gap:8px; }
+  input, select, button { font:inherit; padding:8px 10px; border:1px solid var(--borda); border-radius:6px; }
+  input { flex:1 1 140px; }
+  button { background:var(--verde); color:#fff; border:none; cursor:pointer; font-weight:600; }
+  table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
+  th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--borda); }
+  th { color:#5b6670; font-weight:600; } td.num, th.num { text-align:right; font-variant-numeric: tabular-nums; }
+  .msg { font-size:13px; margin-top:8px; min-height:18px; } .msg.erro { color:var(--erro); } .msg.ok { color:var(--verde); }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header><h1>DocSócios Lite</h1><span>escalas de plantão e repasses médicos</span></header>
+<main>
+  <section>
+    <h2>1. Cadastro de médicos</h2>
+    <form id="f-medico">
+      <input name="nome" placeholder="Nome completo" required>
+      <input name="crm" placeholder="CRM (ex.: 12345-PR)" required>
+      <button>Cadastrar</button>
+    </form>
+    <div class="msg" id="m-medico"></div>
+    <table><thead><tr><th>Médico</th><th>CRM</th></tr></thead><tbody id="t-medicos"></tbody></table>
+  </section>
+
+  <section>
+    <h2>2. Escala de plantões</h2>
+    <form id="f-plantao">
+      <select name="medico_id" id="s-medico" required></select>
+      <input name="data" type="date" required>
+      <select name="turno"><option value="D">Diurno</option><option value="N">Noturno</option></select>
+      <input name="valor" type="number" step="0.01" min="0.01" placeholder="Valor (R$)" required>
+      <button>Adicionar</button>
+    </form>
+    <div class="msg" id="m-plantao"></div>
+    <table><thead><tr><th>Data</th><th>Turno</th><th>Médico</th><th class="num">Valor</th></tr></thead><tbody id="t-plantoes"></tbody></table>
+  </section>
+
+  <section class="full">
+    <h2>3. Repasse do mês</h2>
+    <form id="f-repasse">
+      <input name="mes" type="month" required>
+      <input name="taxa" type="number" step="0.1" min="0" max="100" value="10" title="Taxa administrativa (%)">
+      <button>Calcular repasse</button>
+    </form>
+    <div class="msg" id="m-repasse"></div>
+    <table><thead><tr><th>Médico</th><th>CRM</th><th class="num">Plantões</th><th class="num">Bruto</th><th class="num">Taxa</th><th class="num">Líquido</th></tr></thead><tbody id="t-repasse"></tbody></table>
+  </section>
+</main>
+<script>
+const brl = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const msg = (id, texto, ok) => { const el = document.getElementById(id); el.textContent = texto; el.className = "msg " + (ok ? "ok" : "erro"); };
+
+async function api(url, opts) {
+  const r = await fetch(url, opts); const d = await r.json();
+  if (!r.ok) throw new Error(d.erro || "Erro inesperado");
+  return d;
+}
+const postar = (url, corpo) => api(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo) });
+
+async function carregar() {
+  const medicos = await api("/api/medicos");
+  document.getElementById("t-medicos").innerHTML = medicos.map(m => `<tr><td>${esc(m.nome)}</td><td>${esc(m.crm)}</td></tr>`).join("");
+  document.getElementById("s-medico").innerHTML = medicos.map(m => `<option value="${m.id}">${esc(m.nome)}</option>`).join("");
+  const plantoes = await api("/api/plantoes");
+  document.getElementById("t-plantoes").innerHTML = plantoes.map(p =>
+    `<tr><td>${p.data.split("-").reverse().join("/")}</td><td>${p.turno === "D" ? "Diurno" : "Noturno"}</td><td>${esc(p.medico)}</td><td class="num">${brl(p.valor)}</td></tr>`).join("");
+}
+
+document.getElementById("f-medico").onsubmit = async e => {
+  e.preventDefault(); const f = new FormData(e.target);
+  try { const m = await postar("/api/medicos", Object.fromEntries(f)); msg("m-medico", `${m.nome} cadastrado (${m.crm}).`, true); e.target.reset(); carregar(); }
+  catch (err) { msg("m-medico", err.message); }
+};
+document.getElementById("f-plantao").onsubmit = async e => {
+  e.preventDefault(); const d = Object.fromEntries(new FormData(e.target)); d.medico_id = Number(d.medico_id);
+  try { await postar("/api/plantoes", d); msg("m-plantao", "Plantão adicionado à escala.", true); carregar(); }
+  catch (err) { msg("m-plantao", err.message); }
+};
+document.getElementById("f-repasse").onsubmit = async e => {
+  e.preventDefault(); const d = Object.fromEntries(new FormData(e.target));
+  try {
+    const rep = await api(`/api/repasse?mes=${d.mes}&taxa=${d.taxa}`);
+    document.getElementById("t-repasse").innerHTML = rep.map(r =>
+      `<tr><td>${esc(r.medico)}</td><td>${esc(r.crm)}</td><td class="num">${r.plantoes}</td><td class="num">${brl(r.bruto)}</td><td class="num">${brl(r.taxa)}</td><td class="num"><b>${brl(r.liquido)}</b></td></tr>`).join("");
+    msg("m-repasse", rep.length ? "" : "Nenhum plantão neste mês.", true);
+  } catch (err) { msg("m-repasse", err.message); }
+};
+carregar();
+</script>
+</body>
+</html>

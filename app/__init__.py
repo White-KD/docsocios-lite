@@ -1,5 +1,5 @@
 """DocSócios Lite — versão didática e simplificada de um gestor de escalas médicas."""
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request
 
 from . import services
 from .storage import conectar
@@ -15,6 +15,10 @@ def create_app(db_path="docsocios.db"):
     @app.errorhandler(services.ErroValidacao)
     def erro_validacao(e):
         return jsonify(erro=str(e)), e.status
+
+    @app.get("/")
+    def inicio():
+        return render_template("index.html")
 
     @app.get("/api/saude")
     def saude():
