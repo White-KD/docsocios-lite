@@ -1,4 +1,6 @@
 # DocSócios Lite
+## Rafael Cegatti RA: 2337576
+
 
 Versão didática e simplificada do **DocSócios**, um gestor de escalas de plantões médicos.
 Projeto acadêmico para demonstrar controle de versão, integração contínua, testes automatizados
