@@ -69,6 +69,6 @@ foi bloqueada e o commit `fix(repasse)` corrigiu. Logs em `evidencias/`.
 
 ```bash
 git remote add origin https://github.com/<usuario>/docsocios-lite.git
-git push -u origin main --all
+git push -u origin --all
 bash scripts/demo_falha_github.sh
 ```
