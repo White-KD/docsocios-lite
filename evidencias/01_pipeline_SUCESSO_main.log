@@ -1,0 +1,28 @@
+== PIPELINE LOCAL DocSocios Lite ==
+commit: c834007  branch: main
+
+## JOB testes
+-> Verificar sintaxe
+-> Executar testes automatizados
+============================= test session starts ==============================
+platform linux -- Python 3.13.18, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/claude/docsocios-lite
+plugins: platformdirs-4.13.5, anyio-4.15.1
+collecting ... collected 7 items
+
+tests/test_medicos.py::test_cadastra_medico_e_normaliza_crm PASSED       [ 14%]
+tests/test_medicos.py::test_rejeita_crm_em_formato_invalido PASSED       [ 28%]
+tests/test_medicos.py::test_nao_permite_crm_duplicado PASSED             [ 42%]
+tests/test_plantoes.py::test_registra_plantao_e_lista_na_escala_do_mes PASSED [ 57%]
+tests/test_plantoes.py::test_bloqueia_conflito_de_escala_no_mesmo_turno PASSED [ 71%]
+tests/test_plantoes.py::test_rejeita_plantao_com_valor_ou_turno_invalido PASSED [ 85%]
+tests/test_saude.py::test_endpoint_de_saude_responde_ok PASSED           [100%]
+
+------ generated xml file: /home/claude/docsocios-lite/reports/junit.xml -------
+============================== 7 passed in 0.09s ===============================
+RESULTADO JOB testes: SUCESSO
+
+## JOB entrega
+pacote gerado: dist/docsocios-lite-2026.11.25-c834007.zip
+RESULTADO JOB entrega: SUCESSO

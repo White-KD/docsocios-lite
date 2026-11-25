@@ -1,0 +1,31 @@
+== PIPELINE LOCAL DocSocios Lite ==
+commit: 00cd4b2  branch: feature/repasse-medicos
+
+## JOB testes
+-> Verificar sintaxe
+-> Executar testes automatizados
+============================= test session starts ==============================
+platform linux -- Python 3.13.18, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/claude/docsocios-lite
+plugins: platformdirs-4.13.5, anyio-4.15.1
+collecting ... collected 10 items
+
+tests/test_medicos.py::test_cadastra_medico_e_normaliza_crm PASSED       [ 10%]
+tests/test_medicos.py::test_rejeita_crm_em_formato_invalido PASSED       [ 20%]
+tests/test_medicos.py::test_nao_permite_crm_duplicado PASSED             [ 30%]
+tests/test_plantoes.py::test_registra_plantao_e_lista_na_escala_do_mes PASSED [ 40%]
+tests/test_plantoes.py::test_bloqueia_conflito_de_escala_no_mesmo_turno PASSED [ 50%]
+tests/test_plantoes.py::test_rejeita_plantao_com_valor_ou_turno_invalido PASSED [ 60%]
+tests/test_repasse.py::test_repasse_soma_plantoes_do_mes_e_desconta_taxa_de_10_porcento PASSED [ 70%]
+tests/test_repasse.py::test_repasse_sem_taxa_repassa_valor_integral PASSED [ 80%]
+tests/test_repasse.py::test_repasse_rejeita_mes_invalido PASSED          [ 90%]
+tests/test_saude.py::test_endpoint_de_saude_responde_ok PASSED           [100%]
+
+------ generated xml file: /home/claude/docsocios-lite/reports/junit.xml -------
+============================== 10 passed in 0.11s ==============================
+RESULTADO JOB testes: SUCESSO
+
+## JOB entrega
+pacote gerado: dist/docsocios-lite-2026.11.25-00cd4b2.zip
+RESULTADO JOB entrega: SUCESSO
