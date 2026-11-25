@@ -108,7 +108,7 @@ def calcular_repasse(conn, mes, taxa_percentual=TAXA_ADMIN_PADRAO):
     resultado = []
     for r in rows:
         bruto = float(r["bruto"])
-        liquido = round(bruto * (1 - taxa), 2)
+        liquido = round(bruto * (1 - taxa / 100), 2)  # taxa vem em %, ex.: 10 -> 0,10
         resultado.append({"medico": r["nome"], "crm": r["crm"], "plantoes": r["plantoes"],
                           "bruto": round(bruto, 2), "taxa": round(bruto - liquido, 2),
                           "liquido": liquido})
